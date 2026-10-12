@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Lỗi')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container pb-5" style="max-width: 640px">
+    <div class="card card-body text-center py-5">
+        <div class="display-4 fw-bold text-secondary" th:text="${status ?: 'Lỗi'}">404</div>
+        <h1 class="h4 mt-2"
+            th:text="${errorTitle ?: (status == 404 ? 'Không tìm thấy trang' : 'Đã có lỗi xảy ra')}"></h1>
+        <p class="text-muted"
+           th:text="${errorMessage ?: 'Yêu cầu không thể xử lý. Vui lòng kiểm tra lại đường dẫn.'}"></p>
+        <div>
+            <a class="btn btn-primary" th:href="@{/courses}">Về danh sách khóa học</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

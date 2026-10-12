@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Loại khóa học')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Loại khóa học</h1>
+        <a class="btn btn-primary" th:href="@{/categories/create}">+ Thêm loại khóa học</a>
+    </div>
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="card">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Id</th>
+                <th>Tên loại</th>
+                <th>Mô tả</th>
+                <th class="text-end">Số khóa học</th>
+                <th class="text-end">Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${categories}">
+                <td th:text="${c.id}"></td>
+                <td class="fw-semibold">
+                    <a class="text-decoration-none" th:href="@{/courses(categoryId=${c.id})}" th:text="${c.name}"></a>
+                </td>
+                <td th:text="${c.description}"></td>
+                <td class="text-end" th:text="${c.courseCount}"></td>
+                <td class="text-end text-nowrap">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/categories/{id}/edit(id=${c.id})}">Sửa</a>
+                    <form class="d-inline" method="post" th:action="@{/categories/{id}/delete(id=${c.id})}"
+                          onsubmit="return confirm('Xóa loại khóa học này?');">
+                        <button class="btn btn-sm btn-outline-danger">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(categories)}">
+                <td colspan="5" class="text-center text-muted py-4">Chưa có loại khóa học nào.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

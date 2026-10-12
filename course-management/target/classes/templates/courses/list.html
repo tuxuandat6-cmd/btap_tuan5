@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Danh sách khóa học')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Danh sách khóa học</h1>
+        <a class="btn btn-primary" th:href="@{/courses/create}">+ Thêm khóa học</a>
+    </div>
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- ===== Form tìm kiếm / lọc / sắp xếp (giữ lại giá trị đã nhập) ===== -->
+    <form class="card card-body mb-3" method="get" th:action="@{/courses}" th:object="${filter}">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <label class="form-label small text-muted" for="keyword">Tên khóa học</label>
+                <input type="text" class="form-control" th:field="*{keyword}" placeholder="Nhập một phần tên...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted" for="categoryId">Loại khóa học</label>
+                <select class="form-select" th:field="*{categoryId}">
+                    <option value="">-- Tất cả loại --</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted" for="status">Trạng thái</label>
+                <select class="form-select" th:field="*{status}">
+                    <option value="">-- Tất cả --</option>
+                    <option value="active">Đang tuyển sinh</option>
+                    <option value="inactive">Ngừng tuyển sinh</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted" for="sort">Sắp xếp</label>
+                <select class="form-select" th:field="*{sort}">
+                    <option value="">Mặc định</option>
+                    <option value="fee_asc">Học phí tăng dần</option>
+                    <option value="fee_desc">Học phí giảm dần</option>
+                    <option value="duration_asc">Thời lượng tăng dần</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted" for="minFee">Học phí tối thiểu (VNĐ)</label>
+                <input type="text" inputmode="numeric" class="form-control" th:field="*{minFee}" placeholder="VD: 2000000">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted" for="maxFee">Học phí tối đa (VNĐ)</label>
+                <input type="text" inputmode="numeric" class="form-control" th:field="*{maxFee}" placeholder="VD: 5000000">
+            </div>
+            <div class="col-md-6 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-dark">Tìm kiếm / Lọc</button>
+                <a class="btn btn-outline-secondary" th:href="@{/courses}">Xóa bộ lọc</a>
+            </div>
+        </div>
+    </form>
+
+    <div th:each="e : ${filterErrors}" class="alert alert-warning py-2" th:text="${e}"></div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Ảnh</th>
+                    <th>Tên khóa học</th>
+                    <th>Loại khóa học</th>
+                    <th class="text-end">Học phí</th>
+                    <th class="text-end">Thời lượng</th>
+                    <th>Phân loại</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${courses}">
+                    <td>
+                        <img th:if="${thumbnails[c.id] != null}" th:src="${thumbnails[c.id]}" class="thumb-sm" alt="">
+                        <div th:if="${thumbnails[c.id] == null}" class="thumb-empty">Chưa có ảnh</div>
+                    </td>
+                    <td><a th:href="@{/courses/{id}(id=${c.id})}" class="fw-semibold text-decoration-none"
+                           th:text="${c.name}"></a></td>
+                    <td th:text="${c.category.name}"></td>
+                    <td class="text-end fee"
+                        th:text="${#numbers.formatDecimal(c.tuitionFee, 1, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                    <td class="text-end" th:text="${c.duration} + ' giờ'"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${c.duration <= 30} ? 'text-bg-info' : 'text-bg-secondary'"
+                              th:text="${c.durationType}"></span>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="${c.active} ? 'text-bg-success' : 'text-bg-danger'"
+                              th:text="${c.statusText}"></span>
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/courses/{id}(id=${c.id})}">Chi tiết</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/courses/{id}/edit(id=${c.id})}">Sửa</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(courses) and #lists.isEmpty(filterErrors)}">
+                    <td colspan="8" class="text-center text-muted py-4">
+                        Không tìm thấy khóa học nào phù hợp với điều kiện tìm kiếm.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="text-muted small mt-2" th:text="'Tổng số: ' + ${#lists.size(courses)} + ' khóa học'"></p>
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

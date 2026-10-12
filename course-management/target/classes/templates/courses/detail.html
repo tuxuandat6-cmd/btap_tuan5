@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${course.name})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container pb-5">
+    <a th:href="@{/courses}" class="text-decoration-none small">&larr; Quay lại danh sách</a>
+    <div class="d-flex justify-content-between align-items-start mt-2 mb-3">
+        <div>
+            <h1 class="h3 mb-1" th:text="${course.name}"></h1>
+            <span class="badge" th:classappend="${course.active} ? 'text-bg-success' : 'text-bg-danger'"
+                  th:text="${course.statusText}"></span>
+            <span class="badge" th:classappend="${course.duration <= 30} ? 'text-bg-info' : 'text-bg-secondary'"
+                  th:text="${course.durationType}"></span>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/courses/{id}/edit(id=${course.id})}">Sửa</a>
+            <form method="post" th:action="@{/courses/{id}/delete(id=${course.id})}"
+                  onsubmit="return confirm('Xóa khóa học này cùng toàn bộ ảnh?');">
+                <button class="btn btn-outline-danger">Xóa</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card card-body">
+                <img th:if="${!#lists.isEmpty(course.images) and course.images[0].thumbnail}"
+                     th:src="${course.images[0].imageUrl}" class="hero-img mb-3" alt="Ảnh đại diện">
+                <dl class="row mb-0">
+                    <dt class="col-5">Mã khóa học</dt><dd class="col-7" th:text="${course.id}"></dd>
+                    <dt class="col-5">Loại khóa học</dt><dd class="col-7" th:text="${course.category.name}"></dd>
+                    <dt class="col-5">Học phí</dt>
+                    <dd class="col-7 fee"
+                        th:text="${#numbers.formatDecimal(course.tuitionFee, 1, 'POINT', 0, 'COMMA')} + ' đ'"></dd>
+                    <dt class="col-5">Thời lượng</dt><dd class="col-7" th:text="${course.duration} + ' giờ'"></dd>
+                    <dt class="col-5">Mô tả</dt>
+                    <dd class="col-7" th:text="${course.description} ?: '(Không có mô tả)'"></dd>
+                </dl>
+            </div>
+
+            <!-- ===== Thêm ảnh bằng URL ===== -->
+            <form class="card card-body mt-3" method="post" th:action="@{/courses/{id}/images(id=${course.id})}">
+                <h2 class="h6">Thêm ảnh bằng đường dẫn URL</h2>
+                <input type="text" name="imageUrl" class="form-control mb-2" th:value="${imageUrl}"
+                       placeholder="https://example.com/anh.jpg">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="thumbnail" value="true" id="chkThumb">
+                    <label class="form-check-label" for="chkThumb">Đặt làm ảnh đại diện</label>
+                </div>
+                <button class="btn btn-primary">Thêm ảnh</button>
+            </form>
+        </div>
+
+        <!-- ===== Tất cả ảnh của khóa học ===== -->
+        <div class="col-lg-7">
+            <div class="card card-body">
+                <h2 class="h5 mb-3">Ảnh khóa học
+                    <small class="text-muted" th:text="'(' + ${#lists.size(course.images)} + ')'"></small></h2>
+
+                <div th:if="${#lists.isEmpty(course.images)}" class="alert alert-secondary mb-0">
+                    Khóa học chưa có ảnh. Hãy thêm ảnh bằng đường dẫn URL ở khung bên trái.
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6" th:each="img : ${course.images}">
+                        <div class="card gallery-card h-100" th:classappend="${img.thumbnail} ? 'is-thumb'">
+                            <img th:src="${img.imageUrl}" class="card-img-top gallery-img" alt="">
+                            <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                                <span th:if="${img.thumbnail}" class="badge text-bg-primary">Ảnh đại diện</span>
+                                <form th:unless="${img.thumbnail}" method="post"
+                                      th:action="@{/courses/{cid}/images/{iid}/thumbnail(cid=${course.id},iid=${img.id})}">
+                                    <button class="btn btn-sm btn-outline-primary">Đặt làm ảnh đại diện</button>
+                                </form>
+                                <form method="post"
+                                      th:action="@{/courses/{cid}/images/{iid}/delete(cid=${course.id},iid=${img.id})}"
+                                      onsubmit="return confirm('Xóa ảnh này?');">
+                                    <button class="btn btn-sm btn-link text-danger">Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
